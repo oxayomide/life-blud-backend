@@ -65,6 +65,16 @@ const registerDonor = async (req: Request, res: Response) => {
     const { email, phoneNumber, password, age, weight, pregnancyStatus } =
       await onboardDonorsSchema.validateAsync(req.body);
 
+    if (age === "under 18" || weight === "below 50kg") {
+      return AppResponse(
+        res,
+        Http.BAD_REQUEST,
+        null,
+        "Donor does not meet criteria",
+        false,
+      );
+    }
+
     const hashedPassword = await hashPassword(password);
     await User.create({
       emailAddress: email,
@@ -86,6 +96,15 @@ const registerDonor = async (req: Request, res: Response) => {
     );
   } catch (err: any) {
     console.error("RegisterDonorError:", err);
+    if (err instanceof ValidationError) {
+      return AppResponse(
+        res,
+        Http.UNPROCESSABLE_ENTITY,
+        null,
+        err.details[0].message,
+        false,
+      );
+    }
     return AppResponse(
       res,
       Http.INTERNAL_SERVER_ERROR,
