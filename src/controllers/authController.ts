@@ -3,7 +3,13 @@ import { AppResponse } from "../utils";
 import Http from "../constants/statusCodes";
 import User from "../models/User";
 import { ValidationError } from "joi";
-import { lookUpMailSchema } from "../validation";
+import { lookUpMailSchema, onboardDonorsSchema } from "../validation";
+import bcrypt from "bcrypt";
+
+async function hashPassword(password: string) {
+  const salt = Number(process.env.SALT);
+  return await bcrypt.hash(password, salt);
+}
 
 /**
  * @desc This allows the client find out if the email address
@@ -51,4 +57,43 @@ const lookUpMail = async (req: Request, res: Response) => {
   }
 };
 
-export { lookUpMail };
+/**
+ * @desc Donor Registration
+ */
+const registerDonor = async (req: Request, res: Response) => {
+  try {
+    const { email, phoneNumber, password, age, weight, pregnancyStatus } =
+      await onboardDonorsSchema.validateAsync(req.body);
+
+    const hashedPassword = await hashPassword(password);
+    await User.create({
+      emailAddress: email,
+      phoneNumber,
+      password: hashedPassword,
+      eligibilityCriteria: {
+        age,
+        weight,
+        pregnancyStatus,
+      },
+    });
+
+    return AppResponse(
+      res,
+      Http.CREATED,
+      null,
+      "Donor registered successfully. Check your email to verify your account.",
+      true,
+    );
+  } catch (err: any) {
+    console.error("RegisterDonorError:", err);
+    return AppResponse(
+      res,
+      Http.INTERNAL_SERVER_ERROR,
+      null,
+      "An internal server error occurred",
+      false,
+    );
+  }
+};
+
+export { lookUpMail, registerDonor };
