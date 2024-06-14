@@ -1,5 +1,4 @@
-
-# Contributing to LifeBlud
+# Contributing to LifeBluds
 
 To maintain a streamlined workflow and high-quality code, please follow these guidelines.
 
@@ -18,11 +17,11 @@ To maintain a streamlined workflow and high-quality code, please follow these gu
    cd your-forked-repo
    ```
 
-2. Run:
+2. By default, the `dev` branch should be checked out. Confirm this by running:
    ```bash
-   npm install
+   git branch
    ```
-  This should install necessary packages needed for this project
+   You should see `* dev` indicating that `dev` is the current branch. 
 
 ### Step 3: Set Upstream Remote
 1. Add the original repository as an upstream remote to keep your fork up to date:
